@@ -718,12 +718,13 @@ class Customer(StripeObject):
         return obj
 
     @classmethod
-    def _api_update(cls, id, **data):
+    def _api_update(cls, id, source=None, **data):
         if ('invoice_settings' in data and
                 data['invoice_settings'].get('default_payment_method') == ''):
             data['invoice_settings']['default_payment_method'] = None
-
         obj = super()._api_update(id, **data)
+        if source:
+            cls._api_add_source(obj.id, source)
         schedule_webhook(Event('customer.updated', obj))
         return obj
 
